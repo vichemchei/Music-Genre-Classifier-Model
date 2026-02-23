@@ -3,5 +3,6 @@ flask-cors
 librosa
 scikit-learn
 numpy
+pandas
 joblib
 soundfile

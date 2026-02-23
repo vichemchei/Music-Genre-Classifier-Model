@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import librosa
 import io
 import soundfile as sf
@@ -142,7 +143,7 @@ def _extract(y: np.ndarray, sr: int) -> np.ndarray:
         features.append(mfccs[i].mean())
         features.append(mfccs[i].var())
 
-    return np.array(features, dtype=np.float64).reshape(1, -1)
+    return pd.DataFrame([features], columns=FEATURE_NAMES)
 
 
 def get_system_audio_monitor() -> str:
