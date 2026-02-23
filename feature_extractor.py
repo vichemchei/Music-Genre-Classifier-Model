@@ -92,8 +92,10 @@ def _extract(y: np.ndarray, sr: int) -> np.ndarray:
     Returns:
         numpy array of shape (1, 57)
     """
-    # Noise reduction — clean up ambient/mic noise before feature extraction
-    y = nr.reduce_noise(y=y, sr=sr, stationary=True)
+    # Gentle noise reduction — only partially reduce ambient noise
+    # prop_decrease < 1.0 keeps most of the original signal intact
+    # stationary=False adapts to varying noise (better for real-world recordings)
+    y = nr.reduce_noise(y=y, sr=sr, stationary=False, prop_decrease=0.3)
 
     features = []
 
