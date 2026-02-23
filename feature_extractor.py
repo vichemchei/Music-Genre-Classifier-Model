@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import librosa
+import noisereduce as nr
 import io
 import soundfile as sf
 
@@ -91,6 +92,9 @@ def _extract(y: np.ndarray, sr: int) -> np.ndarray:
     Returns:
         numpy array of shape (1, 57)
     """
+    # Noise reduction — clean up ambient/mic noise before feature extraction
+    y = nr.reduce_noise(y=y, sr=sr, stationary=True)
+
     features = []
 
     # 1. Chroma STFT
