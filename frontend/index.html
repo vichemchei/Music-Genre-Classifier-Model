@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Genre Classifier</title>
+    <meta name="description" content="AI-powered music genre classifier — upload, record, or capture system audio to identify the genre.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🎵</span>
+                <div>
+                    <h1>Genre Classifier</h1>
+                    <p class="subtitle">AI-powered music genre detection</p>
+                </div>
+            </div>
+            <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Input Mode Tabs -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="upload" id="tabUpload">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload File
+            </button>
+            <button class="mode-tab" data-mode="record" id="tabRecord">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                Microphone
+            </button>
+            <button class="mode-tab" data-mode="system" id="tabSystem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="12" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/><line x1="12" y1="14" x2="12" y2="20"/></svg>
+                System Audio
+            </button>
+        </div>
+
+        <!-- Input Panels -->
+        <div class="input-section">
+            <!-- Upload Panel -->
+            <div class="input-panel active" id="panelUpload">
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-content">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="drop-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p class="drop-title">Drop your audio file here</p>
+                        <p class="drop-subtitle">or click to browse</p>
+                        <p class="drop-formats">WAV, MP3, OGG, FLAC, M4A</p>
+                    </div>
+                    <input type="file" id="fileInput" accept="audio/*" hidden>
+                </div>
+                <div class="file-info" id="fileInfo" style="display:none">
+                    <span class="file-icon">🎶</span>
+                    <div class="file-details">
+                        <span class="file-name" id="fileName"></span>
+                        <span class="file-size" id="fileSize"></span>
+                    </div>
+                    <button class="file-remove" id="fileRemove">&times;</button>
+                </div>
+                <button class="btn-primary" id="btnPredict" disabled>
+                    <span class="btn-text">Classify Genre</span>
+                    <span class="btn-loader" style="display:none"></span>
+                </button>
+            </div>
+
+            <!-- Record Panel -->
+            <div class="input-panel" id="panelRecord">
+                <div class="record-container">
+                    <button class="record-btn" id="btnRecord">
+                        <div class="record-circle">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/></svg>
+                        </div>
+                    </button>
+                    <p class="record-label" id="recordLabel">Click to start recording</p>
+                    <div class="record-timer" id="recordTimer" style="display:none">
+                        <span class="timer-dot"></span>
+                        <span class="timer-text" id="timerText">00:00</span>
+                    </div>
+                    <!-- Waveform visualizer -->
+                    <canvas id="waveCanvas" width="400" height="80" style="display:none"></canvas>
+                </div>
+            </div>
+
+            <!-- System Audio Panel -->
+            <div class="input-panel" id="panelSystem">
+                <div class="system-container">
+                    <div class="system-icon-wrap">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="12" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/><line x1="12" y1="14" x2="12" y2="20"/></svg>
+                        <div class="sound-waves">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <p class="system-title">Capture System Audio</p>
+                    <p class="system-desc">Play music on your laptop (YouTube, Spotify, etc.) and we'll identify the genre</p>
+                    <div class="duration-control">
+                        <label for="durationSlider">Capture duration</label>
+                        <div class="slider-row">
+                            <input type="range" id="durationSlider" min="3" max="30" value="10" step="1">
+                            <span class="duration-value" id="durationValue">10s</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary btn-system" id="btnSystem">
+                        <span class="btn-text">Start Listening</span>
+                        <span class="btn-loader" style="display:none"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display:none">
+            <h2 class="results-title">Classification Result</h2>
+
+            <!-- Main result -->
+            <div class="main-result">
+                <div class="genre-badge" id="genreBadge">
+                    <span class="genre-emoji" id="genreEmoji">🎸</span>
+                    <span class="genre-name" id="genreName">Rock</span>
+                </div>
+                <div class="confidence-ring-container">
+                    <svg class="confidence-ring" viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="52" />
+                        <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52" />
+                    </svg>
+                    <div class="confidence-text">
+                        <span class="confidence-value" id="confidenceValue">87</span>
+                        <span class="confidence-unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All genres bar chart -->
+            <div class="genres-chart">
+                <h3 class="chart-title">All Genres</h3>
+                <div class="chart-bars" id="chartBars"></div>
+            </div>
+        </div>
+
+        <!-- Error display -->
+        <div class="error-toast" id="errorToast" style="display:none">
+            <span class="error-icon">⚠️</span>
+            <span class="error-message" id="errorMessage"></span>
+            <button class="error-close" id="errorClose">&times;</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

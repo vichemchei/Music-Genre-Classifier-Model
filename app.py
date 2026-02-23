@@ -2,7 +2,7 @@ import os
 import tempfile
 import numpy as np
 import joblib
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from feature_extractor import (
     extract_features_from_file,
@@ -12,7 +12,8 @@ from feature_extractor import (
 
 
 # App setup
-app = Flask(__name__)
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend')
+app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
 
 # Allowed audio extensions
@@ -79,6 +80,14 @@ def _predict(features: np.ndarray) -> dict:
     }
 
 
+@app.route('/')
+def serve_frontend():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory(FRONTEND_DIR, path)
 
 
 @app.route('/health', methods=['GET'])
