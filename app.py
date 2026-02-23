@@ -153,6 +153,30 @@ def predict_record():
         return jsonify({'error': f'Failed to process audio: {str(e)}'}), 500
 
 
+@app.route('/predict/system', methods=['POST'])
+def predict_system():
+    """
+    Predict genre from system audio (whatever is playing through the speakers).
+
+    Captures audio via PulseAudio/PipeWire monitor source.
+    Optional JSON body: {"duration": 10} (seconds to record, default 10)
+    """
+    duration = 10.0
+    if request.is_json and request.json:
+        duration = float(request.json.get('duration', 10.0))
+        duration = max(3.0, min(duration, 30.0))  # clamp between 3-30s
+
+    try:
+        features = extract_features_from_system_audio(duration=duration)
+        result = _predict(features)
+        result['duration_captured'] = duration
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': f'Failed to capture/process audio: {str(e)}'}), 500
+
+
 if __name__ == '__main__':
    
     app.run(debug=True, host='0.0.0.0', port=5000)
